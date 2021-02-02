@@ -1,5 +1,6 @@
 import org.junit.jupiter.api.AfterEach;
 import utils.LinearRegression;
+import utils.Pair;
 
 import java.util.ArrayList;
 

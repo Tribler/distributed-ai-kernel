@@ -1,3 +1,5 @@
+import utils.Pair;
+
 public class Machine {
 
     static double alpha = 0.005;

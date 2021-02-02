@@ -1,21 +1,23 @@
 import org.jfree.data.xy.XYSeries;
+import org.ujmp.core.Matrix;
+import org.ujmp.core.SparseMatrix;
+import utils.Key;
 import utils.LinearRegression;
 
-import java.util.ArrayList;
+import java.util.*;
 
 
-public class Entity {
+public class Entity2 {
 
 
-    double[] x;
-
-    double[] y;
+    private ArrayList<ArrayList<String>> songHistory;
+    private ArrayList<String> allSongs;
 
 
     /**
      * List of machines.
      */
-    ArrayList<Machine> list = new ArrayList<>();
+    ArrayList<Machine2> list = new ArrayList<>();
 
     /**
      * The number of interations (cycles).
@@ -43,30 +45,21 @@ public class Entity {
 
 
 
-    public Entity(double[] x, double[] y) {
-        this.x = x;
-        this.y = y;
-        pupulate(x,y);
+    public Entity2(ArrayList<ArrayList<String>> songHistory, ArrayList<String> totalSongs) {
+        this.songHistory = songHistory;
+        this.allSongs = totalSongs;
+        pupulate(songHistory);
     }
 
 
-    public void run() {
+    public HashMap<Key, Float> run() {
 
         perform();
 
-        Pair<Double> average = average();
+        HashMap<Key, Float> model3 = averageModel();
 
-        System.out.println("OUR_AVERAGE SLOPE: " + average.X() + "  OUR AVERAGE INTERCEPT: " + average.Y());
 
-        System.out.println("[BEST_FIT LINE]: SLOPE:" + new LinearRegression(x,y).slope() + " intercept: " +  new LinearRegression(x,y).intercept());
-
-        System.out.println("BEST FIT LINE error:" + LSQRS(x,y,new LinearRegression(x,y).slope(),new LinearRegression(x,y).intercept()));
-
-        System.out.println("OUR LINE error:" + LSQRS(x,y,average.X(),average.Y()));
-
-        System.out.println("RELATIVE ERROR: " + LSQRS(x,y,new LinearRegression(x,y).slope(),new LinearRegression(x,y).intercept()) / LSQRS(x,y,average.X(),average.Y()));
-
-        double relative_error = LSQRS(x,y,new LinearRegression(x,y).slope(),new LinearRegression(x,y).intercept()) / LSQRS(x,y,average.X(),average.Y());
+        return model3;
     }
 
 
@@ -100,38 +93,49 @@ public class Entity {
 
                 list.get(rand2).updateUM(list.get(i));
             }
-            Pair<Double> average = average();
+            //utils.Pair<Double> average = average();
 
             if (it % 100 == 0) {
 //                System.out.println(LSQRS(x,y,new utils.LinearRegression(x,y).slope(),new utils.LinearRegression(x,y).intercept()) / LSQRS(x,y,average.X(),average.Y()));
-                series.add(N-it,LSQRS(x,y,new LinearRegression(x,y).slope(),new LinearRegression(x,y).intercept()) / LSQRS(x,y,average.X(),average.Y()));
+                //series.add(N-it,LSQRS(x,y,new LinearRegression(x,y).slope(),new LinearRegression(x,y).intercept()) / LSQRS(x,y,average.X(),average.Y()));
 
 
             }
 
+            System.out.println(it);
             it--;
         }
     }
 
 
 
-    private Pair average() {
+    private HashMap<Key, Float> averageModel() {
 
-        double sumx=0,sumy=0;
+        int nrOfSongs = songHistory.size();
+        Machine2 finalMachine = list.get(0);
 
-        for(int i=0; i<list.size();i++) {
-            sumx += list.get(i).getIntercept();
-            sumy += list.get(i).getBias();
+        for(int i = 1 ; i < list.size() - 1; i++){
+
+            Machine2 m = list.get(i);
+
+            finalMachine.mergeModels(m ,1);
+
+            //finalMap = m.mergeModels(finalMap, m.getModel3());
+
         }
-        return new Pair(sumx/list.size(), sumy/list.size());
+
+        finalMachine.mergeModels(list.get(list.size()-1), list.size());
+
+        return finalMachine.getModel3();
     }
 
 
 
-    private void pupulate(double[] x, double []y){
-        for(int i=0; i<x.length;i++)
-            list.add(new Machine(x[i], y[i]));
+    private void pupulate(ArrayList<ArrayList<String>> songHistory){
+        for(int i=0; i<songHistory.size();i++)
+            list.add(new Machine2(songHistory.get(i).size(),0.5f,songHistory.get(i), allSongs));
     }
+    ////?????
 
 
     private void print(double[] x, double[] y){

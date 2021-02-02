@@ -44,5 +44,10 @@
         <version>5.5.2</version>
         <scope>test</scope>
     </dependency>
+        <dependency>
+            <groupId>org.ujmp</groupId>
+            <artifactId>ujmp-core</artifactId>
+            <version>0.3.0</version>
+        </dependency>
     </dependencies>
 </project>
